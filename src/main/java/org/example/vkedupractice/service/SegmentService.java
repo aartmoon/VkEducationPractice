@@ -88,7 +88,7 @@ public class SegmentService {
     }
 
     public void assignSegmentToRandomUsers(Segment segment, int percentage) {
-        List<User> allUsers = userRepository.findAll();
+        List<User> allUsers = userRepository.findAllWithSegments();
         if (allUsers.isEmpty()) {
             return;
         }

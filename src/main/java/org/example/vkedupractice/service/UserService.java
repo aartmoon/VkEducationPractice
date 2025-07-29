@@ -2,8 +2,12 @@ package org.example.vkedupractice.service;
 
 import org.example.vkedupractice.dto.UserDto;
 import org.example.vkedupractice.dto.UserSegmentsResponse;
+import org.example.vkedupractice.model.Segment;
 import org.example.vkedupractice.model.User;
 import org.example.vkedupractice.repository.UserRepository;
+
+import java.util.HashSet;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,19 +30,28 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Optional<UserDto> getUserById(Long id) {
         return userRepository.findById(id)
-                .map(this::convertToDto);
+                .map(user -> {
+                    // Принудительно загрузить сегменты
+                    user.getSegments().size();
+                    return convertToDto(user);
+                });
     }
 
+    @Transactional(readOnly = true)
     public UserSegmentsResponse getUserSegments(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-        
+
+        // Принудительно загрузить сегменты
+        user.getSegments().size();
+
         Set<String> segmentNames = user.getSegments().stream()
-                .map(segment -> segment.getName())
+                .map(Segment::getName)
                 .collect(Collectors.toSet());
-        
+
         return UserSegmentsResponse.builder()
                 .userId(userId)
                 .username(user.getUsername())
@@ -47,8 +60,14 @@ public class UserService {
     }
 
     public List<UserDto> getUsersBySegment(String segmentName) {
-        return userRepository.findUsersBySegmentName(segmentName).stream()
-                .map(this::convertToDto)
+        return userRepository.findUsersBySegmentNameWithSegments(segmentName).stream()
+                .map(user -> UserDto.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .createdAt(user.getCreatedAt())
+                        .segmentNames(Set.of(segmentName))
+                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -58,15 +77,15 @@ public class UserService {
 
     private UserDto convertToDto(User user) {
         Set<String> segmentNames = user.getSegments().stream()
-                .map(segment -> segment.getName())
+                .map(Segment::getName)
                 .collect(Collectors.toSet());
-        
+
         return UserDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .createdAt(user.getCreatedAt())
-                .segmentNames(segmentNames)
+                .segmentNames(segmentNames) // теперь передаем реальные сегменты
                 .build();
     }
 } 
