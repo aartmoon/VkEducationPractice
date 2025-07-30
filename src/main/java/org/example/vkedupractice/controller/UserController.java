@@ -19,8 +19,12 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers() {
-        List<UserDto> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+        try {
+            return ResponseEntity.ok(userService.getAllUsers());
+        } catch (Throwable t) {
+            t.printStackTrace();     // вот тут стектрейс выведется в консоль
+            throw t;                 // чтобы поведение осталось прежним
+        }
     }
 
     @GetMapping("/{id}")
@@ -51,4 +55,4 @@ public class UserController {
         long count = userService.getTotalUserCount();
         return ResponseEntity.ok(count);
     }
-} 
+}

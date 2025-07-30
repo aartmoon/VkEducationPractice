@@ -1,20 +1,21 @@
 package org.example.vkedupractice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "segments")
-@Data
-@Builder
+// Аналогично — исключаем users из equals/hashCode
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Segment {
 
     @Id
@@ -31,6 +32,7 @@ public class Segment {
     private LocalDateTime createdAt;
 
     @ManyToMany(mappedBy = "segments", fetch = FetchType.LAZY)
+    @JsonIgnore
     @Builder.Default
     private Set<User> users = new HashSet<>();
 

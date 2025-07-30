@@ -52,7 +52,7 @@ class UserServiceTest {
     void getAllUsers_ShouldReturnAllUsers() {
         // Given
         List<User> users = Arrays.asList(testUser);
-        when(userRepository.findAll()).thenReturn(users);
+        when(userRepository.findAllWithSegments()).thenReturn(users);
 
         // When
         List<UserDto> result = userService.getAllUsers();
@@ -65,7 +65,7 @@ class UserServiceTest {
         assertEquals(testUser.getEmail(), result.get(0).getEmail());
         assertTrue(result.get(0).getSegmentNames().contains(testSegment.getName()));
         
-        verify(userRepository).findAll();
+        verify(userRepository).findAllWithSegments();
     }
 
     @Test

@@ -1,20 +1,22 @@
 package org.example.vkedupractice.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Table(name = "users")
-@Data
-@Builder
+// Вместо @Data используем явный @Getter/@Setter + @EqualsAndHashCode(exclude = "segments")
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
 
     @Id
@@ -31,6 +33,7 @@ public class User {
     private LocalDateTime createdAt;
 
     @ManyToMany(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinTable(
         name = "user_segments",
         joinColumns = @JoinColumn(name = "user_id"),
