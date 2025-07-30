@@ -9,7 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/segments")
@@ -46,9 +48,14 @@ public class SegmentController {
     public ResponseEntity<SegmentDto> createSegment(
             @Validated @RequestBody CreateSegmentRequest request
     ) {
-        // Вся логика создания сегмента + рандомной рассылки — внутри сервиса
-        SegmentDto dto = segmentService.createSegment(request);
-        return ResponseEntity.ok(dto);
+        try {
+            SegmentDto dto = segmentService.createSegment(request);
+            return ResponseEntity.ok(dto);
+        } catch (RuntimeException ex) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PutMapping("/{id}")
@@ -79,4 +86,4 @@ public class SegmentController {
         long count = segmentService.getUsersInSegmentCount(name);
         return ResponseEntity.ok(count);
     }
-} 
+}

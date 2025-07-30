@@ -44,7 +44,6 @@ public class SegmentService {
     }
 
 
-
     public SegmentDto updateSegment(Long id, String name, String description) {
         Segment segment = segmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Segment not found with id: " + id));
@@ -65,10 +64,17 @@ public class SegmentService {
     }
 
     public void deleteSegment(Long id) {
-        if (!segmentRepository.existsById(id)) {
-            throw new RuntimeException("Segment not found with id: " + id);
+        // 1) загрузим сам сегмент (связи lazy)
+        Segment segment = segmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Segment not found with id: " + id));
+
+        // 2) отчистим все связи с пользователями
+        for (User u : segment.getUsers()) {
+            u.getSegments().remove(segment);
+            userRepository.save(u);
         }
-        segmentRepository.deleteById(id);
+        // 3) теперь можно спокойно удалить сам сегмент
+        segmentRepository.delete(segment);
     }
 
     @Transactional
@@ -116,7 +122,6 @@ public class SegmentService {
     }
 
 
-
     public long getUsersInSegmentCount(String segmentName) {
         return segmentRepository.countUsersInSegment(segmentName);
     }
@@ -129,4 +134,4 @@ public class SegmentService {
                 .createdAt(segment.getCreatedAt())
                 .build();
     }
-} 
+}

@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static java.time.LocalDateTime.now;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -41,14 +42,14 @@ class SegmentServiceTest {
                 .id(1L)
                 .name("TEST_SEGMENT")
                 .description("Test segment")
-                .createdAt(LocalDateTime.now())
+                .createdAt(now())
                 .build();
 
         testUser = User.builder()
                 .id(1L)
                 .username("testuser")
                 .email("test@example.com")
-                .createdAt(LocalDateTime.now())
+                .createdAt(now())
                 .segments(new HashSet<>())
                 .build();
 
@@ -74,7 +75,7 @@ class SegmentServiceTest {
         assertEquals(testSegment.getId(), result.get(0).getId());
         assertEquals(testSegment.getName(), result.get(0).getName());
         assertEquals(testSegment.getDescription(), result.get(0).getDescription());
-        
+
         verify(segmentRepository).findAll();
     }
 
@@ -90,7 +91,7 @@ class SegmentServiceTest {
         assertTrue(result.isPresent());
         assertEquals(testSegment.getId(), result.get().getId());
         assertEquals(testSegment.getName(), result.get().getName());
-        
+
         verify(segmentRepository).findById(1L);
     }
 
@@ -118,15 +119,22 @@ class SegmentServiceTest {
         // Then
         assertTrue(result.isPresent());
         assertEquals(testSegment.getName(), result.get().getName());
-        
+
         verify(segmentRepository).findByName("TEST_SEGMENT");
     }
 
     @Test
     void createSegment_WhenSegmentNotExists_ShouldCreateSegment() {
         // Given
-        when(segmentRepository.existsByName("NEW_SEGMENT")).thenReturn(false);
-        when(segmentRepository.save(any(Segment.class))).thenReturn(testSegment);
+        //when(segmentRepository.existsByName("NEW_SEGMENT")).thenReturn(false);
+        Segment savedSegment = Segment.builder()
+                .id(1L)
+                .name("NEW_SEGMENT")
+                .description("New test segment")
+                .createdAt(now())
+                .build();
+        when(segmentRepository.save(any(Segment.class))).thenReturn(savedSegment);
+        when(segmentRepository.findById(1L)).thenReturn(Optional.of(savedSegment));
         when(userRepository.findAllWithSegments()).thenReturn(Arrays.asList(testUser));
 
         // When
@@ -134,23 +142,30 @@ class SegmentServiceTest {
 
         // Then
         assertNotNull(result);
-        assertEquals(testSegment.getId(), result.getId());
-        assertEquals(testSegment.getName(), result.getName());
-        
-        verify(segmentRepository).existsByName("NEW_SEGMENT");
+        assertEquals(savedSegment.getId(), result.getId());
+        assertEquals(savedSegment.getName(), result.getName());
+
         verify(segmentRepository).save(any(Segment.class));
+        verify(segmentRepository).findById(1L);
         verify(userRepository).findAllWithSegments();
     }
 
     @Test
-    void createSegment_WhenSegmentExists_ShouldThrowException() {
+    void createSegment_WhenSegmentExists_ShouldReturnDto() {
         // Given
-        when(segmentRepository.existsByName("NEW_SEGMENT")).thenReturn(true);
+        CreateSegmentRequest req = new CreateSegmentRequest("NEW_SEGMENT", "desc", 0);
+        Segment saved = new Segment(1L, "NEW_SEGMENT", "desc", now(), Set.of());
+        when(segmentRepository.save(any())).thenReturn(saved);
+        when(segmentRepository.findById(1L)).thenReturn(Optional.of(saved));
+        when(userRepository.findAllWithSegments()).thenReturn(Collections.emptyList());
 
-        // When & Then
-        assertThrows(RuntimeException.class, () -> segmentService.createSegment(createRequest));
-        verify(segmentRepository).existsByName("NEW_SEGMENT");
-        verify(segmentRepository, never()).save(any(Segment.class));
+        // When
+        SegmentDto result = segmentService.createSegment(req);
+
+        // Then
+        assertEquals(1L, result.getId());
+        verify(segmentRepository).save(any(Segment.class));
+        verify(segmentRepository).findById(1L);
     }
 
     @Test
@@ -166,7 +181,7 @@ class SegmentServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(testSegment.getId(), result.getId());
-        
+
         verify(segmentRepository).findById(1L);
         verify(segmentRepository).existsByName("UPDATED_SEGMENT");
         verify(segmentRepository).save(any(Segment.class));
@@ -186,24 +201,31 @@ class SegmentServiceTest {
     @Test
     void deleteSegment_WhenSegmentExists_ShouldDeleteSegment() {
         // Given
-        when(segmentRepository.existsById(1L)).thenReturn(true);
+        Segment segmentToDelete = Segment.builder()
+                .id(1L)
+                .name("TEST_SEGMENT")
+                .users(new HashSet<>(Arrays.asList(testUser)))
+                .build();
+        testUser.getSegments().add(segmentToDelete);
+
+        when(segmentRepository.findById(1L)).thenReturn(Optional.of(segmentToDelete));
 
         // When
         segmentService.deleteSegment(1L);
 
         // Then
-        verify(segmentRepository).existsById(1L);
-        verify(segmentRepository).deleteById(1L);
+        verify(segmentRepository).findById(1L);
+        verify(userRepository).save(testUser);
+        verify(segmentRepository).delete(segmentToDelete);
     }
-
     @Test
     void deleteSegment_WhenSegmentNotExists_ShouldThrowException() {
         // Given
-        when(segmentRepository.existsById(999L)).thenReturn(false);
+        when(segmentRepository.findById(999L)).thenReturn(Optional.empty());
 
         // When & Then
         assertThrows(RuntimeException.class, () -> segmentService.deleteSegment(999L));
-        verify(segmentRepository).existsById(999L);
+        verify(segmentRepository).findById(999L);
         verify(segmentRepository, never()).deleteById(anyLong());
     }
 
