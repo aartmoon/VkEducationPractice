@@ -3,6 +3,7 @@ package org.example.vkedupractice.controller;
 import org.example.vkedupractice.dto.CreateSegmentRequest;
 import org.example.vkedupractice.dto.SegmentDto;
 import org.example.vkedupractice.service.SegmentService;
+import org.example.vkedupractice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +18,9 @@ public class SegmentController {
 
     @Autowired
     private SegmentService segmentService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping
     public ResponseEntity<List<SegmentDto>> getAllSegments() {
@@ -39,13 +43,12 @@ public class SegmentController {
     }
 
     @PostMapping
-    public ResponseEntity<SegmentDto> createSegment(@Validated @RequestBody CreateSegmentRequest request) {
-        try {
-            SegmentDto segment = segmentService.createSegment(request);
-            return ResponseEntity.ok(segment);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<SegmentDto> createSegment(
+            @Validated @RequestBody CreateSegmentRequest request
+    ) {
+        // Вся логика создания сегмента + рандомной рассылки — внутри сервиса
+        SegmentDto dto = segmentService.createSegment(request);
+        return ResponseEntity.ok(dto);
     }
 
     @PutMapping("/{id}")

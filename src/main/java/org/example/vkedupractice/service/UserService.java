@@ -92,13 +92,4 @@ public class UserService {
         return userRepository.countAllUsers();
     }
 
-    @Transactional
-    public void addUsersToSegment(String segmentName, List<Long> userIds) {
-        Segment segment = segmentRepository.findByName(segmentName)
-                .orElseThrow(() -> new EntityNotFoundException("Segment not found"));
-
-        List<User> users = userRepository.findAllById(userIds);
-        users.forEach(user -> user.getSegments().add(segment));
-        userRepository.saveAll(users);
-    }
 } 

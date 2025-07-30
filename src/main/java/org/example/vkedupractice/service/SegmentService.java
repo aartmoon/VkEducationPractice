@@ -43,23 +43,7 @@ public class SegmentService {
                 .map(this::convertToDto);
     }
 
-    public SegmentDto createSegment(CreateSegmentRequest request) {
-        if (segmentRepository.existsByName(request.getName())) {
-            throw new RuntimeException("Segment with name '" + request.getName() + "' already exists");
-        }
 
-        Segment segment = Segment.builder()
-                .name(request.getName())
-                .description(request.getDescription())
-                .build();
-
-        segment = segmentRepository.save(segment);
-
-        // Assign segment to random percentage of users
-        assignSegmentToRandomUsers(segment, request.getPercentage());
-
-        return convertToDto(segment);
-    }
 
     public SegmentDto updateSegment(Long id, String name, String description) {
         Segment segment = segmentRepository.findById(id)
@@ -87,35 +71,51 @@ public class SegmentService {
         segmentRepository.deleteById(id);
     }
 
+    @Transactional
+    public SegmentDto createSegment(CreateSegmentRequest request) {
+        // 1) сохраняем или обновляем сам сегмент
+        Segment segment = Segment.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .build();
+
+        segment = segmentRepository.save(segment);
+        segment = segmentRepository.findById(segment.getId()).orElseThrow();
+        // 2) запускаем вашу функцию, которая сама берёт процент и кидает на нужных пользователей
+        assignSegmentToRandomUsers(segment, request.getPercentage());
+
+        // 3) конвертим в DTO
+        return SegmentDto.from(segment);
+    }
+
+    // File: src/main/java/org/example/vkedupractice/service/SegmentService.java
+
+    @Transactional
     public void assignSegmentToRandomUsers(Segment segment, int percentage) {
         List<User> allUsers = userRepository.findAllWithSegments();
-        if (allUsers.isEmpty()) {
-            return;
-        }
+        if (allUsers.isEmpty()) return;
 
         int targetUserCount = (int) Math.ceil(allUsers.size() * percentage / 100.0);
         int currentUserCount = (int) segmentRepository.countUsersInSegment(segment.getName());
-
-        if (currentUserCount >= targetUserCount) {
-            return;
-        }
+        if (currentUserCount >= targetUserCount) return;
 
         int usersToAdd = targetUserCount - currentUserCount;
-        
-        // Get users not in this segment
+
+        // <-- здесь: фильтруем по id, чтобы взять только тех, у кого ещё НЕТ этого сегмента
         List<User> availableUsers = allUsers.stream()
-                .filter(user -> user.getSegments().stream()
-                        .noneMatch(s -> s.getName().equals(segment.getName())))
+                .filter(u -> u.getSegments().stream()
+                        .noneMatch(s -> s.getId().equals(segment.getId())))  // <-- здесь
                 .collect(Collectors.toList());
 
-        // Randomly select users
+        Random rnd = new Random();
         for (int i = 0; i < Math.min(usersToAdd, availableUsers.size()); i++) {
-            int randomIndex = random.nextInt(availableUsers.size());
-            User user = availableUsers.remove(randomIndex);
-            user.getSegments().add(segment);
-            userRepository.save(user);
+            User u = availableUsers.remove(rnd.nextInt(availableUsers.size()));
+            u.getSegments().add(segment);      // добавляем сегмент на "владеющей" стороне
+            userRepository.save(u);            // сохраняем только пользователя
         }
     }
+
+
 
     public long getUsersInSegmentCount(String segmentName) {
         return segmentRepository.countUsersInSegment(segmentName);
