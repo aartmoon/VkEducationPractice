@@ -110,9 +110,9 @@ GET /api/segments/{name}/users/count
 
 Параметры для PostgreSQL:
 
-- DB= `vkedu`
-- USER= `myuser`
-- PASSWORD= `mypassword`
+- DB: `vkedu`
+- USER: `myuser`
+- PASSWORD: `mypassword`
 
 ## Технологии
 
@@ -123,3 +123,12 @@ GET /api/segments/{name}/users/count
 - Lombok
 - Java 21
 - Docker & Docker Compose
+- Maven
+- JUnit
+
+## Тестирование
+Для запуска тестов используйте команду:
+```bash
+mvn test
+```
+Покрытие кода тестами: 90+%

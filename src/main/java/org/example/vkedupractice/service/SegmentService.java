@@ -9,6 +9,8 @@ import org.example.vkedupractice.repository.SegmentRepository;
 import org.example.vkedupractice.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -86,6 +88,10 @@ public class SegmentService {
 
     @Transactional
     public void assignSegmentToRandomUsers(Segment segment, int percentage) {
+        if (percentage < 0 || percentage > 100) {
+            throw new IllegalArgumentException("Percentage must be between 0 and 100");
+        }
+
         List<User> allUsers = userRepository.findAllWithSegments();
         if (allUsers.isEmpty()) return;
 
@@ -97,15 +103,18 @@ public class SegmentService {
 
         List<User> availableUsers = allUsers.stream()
                 .filter(u -> u.getSegments().stream()
-                        .noneMatch(s -> s.getId().equals(segment.getId())))  // <-- здесь
+                        .noneMatch(s -> s.getId().equals(segment.getId())))
                 .collect(Collectors.toList());
 
-        Random rnd = new Random();
-        for (int i = 0; i < Math.min(usersToAdd, availableUsers.size()); i++) {
-            User u = availableUsers.remove(rnd.nextInt(availableUsers.size()));
-            u.getSegments().add(segment);
-            userRepository.save(u);
+        if (availableUsers.isEmpty()) return;
+
+        Collections.shuffle(availableUsers);
+        List<User> usersToUpdate = availableUsers.subList(0, Math.min(usersToAdd, availableUsers.size()));
+
+        for (User user : usersToUpdate) {
+            user.getSegments().add(segment);
         }
+        userRepository.saveAll(usersToUpdate);
     }
 
 
