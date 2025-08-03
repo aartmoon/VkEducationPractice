@@ -100,12 +100,10 @@ DELETE /api/segments/{id}
 GET /api/segments/{name}/users/count
 ```
 
-## База данных
+## База данных 
 
-Приложение использует H2 in-memory базу данных. Консоль H2 доступна по адресу:
-http://localhost:8081/h2-console
+Параметры подключения h2:
 
-Параметры подключения:
 - JDBC URL: `jdbc:h2:mem:testdb`
 - Username: `sa`
 - Password: `password`
@@ -124,4 +122,4 @@ http://localhost:8081/h2-console
 - PostgreSQL
 - Lombok
 - Java 21
-- Docker
+- Docker & Docker Compose
