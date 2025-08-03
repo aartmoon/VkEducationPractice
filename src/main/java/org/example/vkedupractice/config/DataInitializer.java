@@ -1,8 +1,8 @@
 package org.example.vkedupractice.config;
 
+import lombok.RequiredArgsConstructor;
 import org.example.vkedupractice.model.User;
 import org.example.vkedupractice.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -11,10 +11,10 @@ import java.util.List;
 
 @Component
 @Profile("!test")
+@RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
     public void run(String... args) {

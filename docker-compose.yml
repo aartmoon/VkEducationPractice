@@ -2,24 +2,34 @@ services:
   db:
     image: postgres:14-alpine
     container_name: vkedu-postgres
-    environment:
-      POSTGRES_DB: vkedu
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+    env_file:
+      - .env
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
-    volumes:
-      - ./initdb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 5
 
   app:
-    build: .
-    image: vkedu-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vkedu-app
+    env_file:
+      - .env
     depends_on:
-      - db
-    environment:
-      SPRING_PROFILES_ACTIVE: postgresql
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/vkedu
-      SPRING_DATASOURCE_USERNAME: myuser
-      SPRING_DATASOURCE_PASSWORD: mypassword
+      db:
+        condition: service_healthy
     ports:
-      - "8080:8080"
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    command: >
+      sh -c "java -jar /app.jar
+      --spring.profiles.active=${SPRING_PROFILES_ACTIVE}
+      --server.port=${SERVER_PORT}"
+
+volumes:
+  db-data:

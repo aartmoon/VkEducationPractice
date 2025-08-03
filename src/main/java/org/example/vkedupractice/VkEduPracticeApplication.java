@@ -11,3 +11,10 @@ public class VkEduPracticeApplication {
     }
 
 }
+/*
+запускаем на h2:
+mvn spring-boot:run
+
+запускаем на postgresql
+docker-compose up -d
+ */
