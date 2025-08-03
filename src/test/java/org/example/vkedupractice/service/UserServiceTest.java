@@ -50,14 +50,11 @@ class UserServiceTest {
 
     @Test
     void getAllUsers_ShouldReturnAllUsers() {
-        // Given
         List<User> users = Arrays.asList(testUser);
         when(userRepository.findAllWithSegments()).thenReturn(users);
 
-        // When
         List<UserDto> result = userService.getAllUsers();
 
-        // Then
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(testUser.getId(), result.get(0).getId());
@@ -70,13 +67,10 @@ class UserServiceTest {
 
     @Test
     void getUserById_WhenUserExists_ShouldReturnUser() {
-        // Given
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
-        // When
         Optional<UserDto> result = userService.getUserById(1L);
 
-        // Then
         assertTrue(result.isPresent());
         assertEquals(testUser.getId(), result.get().getId());
         assertEquals(testUser.getUsername(), result.get().getUsername());
@@ -87,26 +81,20 @@ class UserServiceTest {
 
     @Test
     void getUserById_WhenUserNotExists_ShouldReturnEmpty() {
-        // Given
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // When
         Optional<UserDto> result = userService.getUserById(999L);
 
-        // Then
         assertFalse(result.isPresent());
         verify(userRepository).findById(999L);
     }
 
     @Test
     void getUserSegments_WhenUserExists_ShouldReturnUserSegments() {
-        // Given
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
-        // When
         UserSegmentsResponse result = userService.getUserSegments(1L);
 
-        // Then
         assertNotNull(result);
         assertEquals(testUser.getId(), result.getUserId());
         assertEquals(testUser.getUsername(), result.getUsername());
@@ -117,17 +105,14 @@ class UserServiceTest {
 
     @Test
     void getUserSegments_WhenUserNotExists_ShouldThrowException() {
-        // Given
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // When & Then
         assertThrows(RuntimeException.class, () -> userService.getUserSegments(999L));
         verify(userRepository).findById(999L);
     }
 
     @Test
     void getUsersBySegment_ShouldReturnUsersInSegment() {
-        // Given
         Segment segment = Segment.builder()
                 .id(1L)
                 .name("TEST_SEGMENT")
@@ -144,31 +129,24 @@ class UserServiceTest {
                 .build();
 
         List<User> usersInSegment = Collections.singletonList(userInSegment);
-        // Fix: Use the correct method name here
         when(userRepository.findUsersBySegmentNameWithSegments("TEST_SEGMENT"))
                 .thenReturn(usersInSegment);
 
-        // When
         List<UserDto> result = userService.getUsersBySegment("TEST_SEGMENT");
 
-        // Then
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(userInSegment.getId(), result.get(0).getId());
 
-        // Fix: Verify the correct method
         verify(userRepository).findUsersBySegmentNameWithSegments("TEST_SEGMENT");
     }
 
     @Test
     void getTotalUserCount_ShouldReturnCorrectCount() {
-        // Given
         when(userRepository.countAllUsers()).thenReturn(10L);
 
-        // When
         long result = userService.getTotalUserCount();
 
-        // Then
         assertEquals(10L, result);
         verify(userRepository).countAllUsers();
     }

@@ -52,14 +52,11 @@ class UserControllerTest {
 
     @Test
     void getAllUsers_ShouldReturnAllUsers() {
-        // Given
         List<UserDto> users = Arrays.asList(testUserDto);
         when(userService.getAllUsers()).thenReturn(users);
 
-        // When
         ResponseEntity<List<UserDto>> response = userController.getAllUsers();
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(1, response.getBody().size());
@@ -70,13 +67,10 @@ class UserControllerTest {
 
     @Test
     void getUserById_WhenUserExists_ShouldReturnUser() {
-        // Given
         when(userService.getUserById(1L)).thenReturn(Optional.of(testUserDto));
 
-        // When
         ResponseEntity<UserDto> response = userController.getUserById(1L);
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(testUserDto.getId(), response.getBody().getId());
@@ -86,13 +80,10 @@ class UserControllerTest {
 
     @Test
     void getUserById_WhenUserNotExists_ShouldReturnNotFound() {
-        // Given
         when(userService.getUserById(999L)).thenReturn(Optional.empty());
 
-        // When
         ResponseEntity<UserDto> response = userController.getUserById(999L);
 
-        // Then
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
         
@@ -101,13 +92,10 @@ class UserControllerTest {
 
     @Test
     void getUserSegments_WhenUserExists_ShouldReturnUserSegments() {
-        // Given
         when(userService.getUserSegments(1L)).thenReturn(testUserSegmentsResponse);
 
-        // When
         ResponseEntity<UserSegmentsResponse> response = userController.getUserSegments(1L);
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(testUserSegmentsResponse.getUserId(), response.getBody().getUserId());
@@ -119,13 +107,10 @@ class UserControllerTest {
 
     @Test
     void getUserSegments_WhenUserNotExists_ShouldReturnNotFound() {
-        // Given
         when(userService.getUserSegments(999L)).thenThrow(new RuntimeException("User not found"));
 
-        // When
         ResponseEntity<UserSegmentsResponse> response = userController.getUserSegments(999L);
 
-        // Then
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
         
@@ -134,14 +119,11 @@ class UserControllerTest {
 
     @Test
     void getUsersBySegment_ShouldReturnUsersInSegment() {
-        // Given
         List<UserDto> users = Arrays.asList(testUserDto);
         when(userService.getUsersBySegment("TEST_SEGMENT")).thenReturn(users);
 
-        // When
         ResponseEntity<List<UserDto>> response = userController.getUsersBySegment("TEST_SEGMENT");
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(1, response.getBody().size());
@@ -152,13 +134,10 @@ class UserControllerTest {
 
     @Test
     void getTotalUserCount_ShouldReturnCorrectCount() {
-        // Given
         when(userService.getTotalUserCount()).thenReturn(10L);
 
-        // When
         ResponseEntity<Long> response = userController.getTotalUserCount();
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(10L, response.getBody());
         

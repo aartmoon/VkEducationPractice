@@ -1,9 +1,9 @@
 package org.example.vkedupractice.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.example.vkedupractice.dto.UserDto;
 import org.example.vkedupractice.dto.UserSegmentsResponse;
 import org.example.vkedupractice.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,18 +12,18 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers() {
         try {
             return ResponseEntity.ok(userService.getAllUsers());
         } catch (Throwable t) {
-            t.printStackTrace();     // вот тут стектрейс выведется в консоль
-            throw t;                 // чтобы поведение осталось прежним
+            t.printStackTrace();
+            throw t;
         }
     }
 

@@ -20,4 +20,4 @@ public interface SegmentRepository extends JpaRepository<Segment, Long> {
     
     @Query("SELECT COUNT(u) FROM User u JOIN u.segments s WHERE s.name = :segmentName")
     long countUsersInSegment(@Param("segmentName") String segmentName);
-} 
+}

@@ -29,12 +29,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.segments")
     List<User> findAllWithSegments();
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.segments WHERE u.id IN :ids")
-    List<User> findAllWithSegmentsById(@Param("ids") List<Long> ids);
-
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.segments WHERE u.id = :id")
-    Optional<User> findByIdWithSegments(@Param("id") Long id);
-
     @Query("SELECT DISTINCT u FROM User u JOIN u.segments s WHERE s.name = :segmentName")
     List<User> findUsersBySegmentNameWithSegments(@Param("segmentName") String segmentName);
 }

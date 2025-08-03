@@ -11,12 +11,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -50,14 +48,11 @@ class SegmentControllerTest {
 
     @Test
     void getAllSegments_ShouldReturnAllSegments() {
-        // Given
         List<SegmentDto> segments = Arrays.asList(testSegmentDto);
         when(segmentService.getAllSegments()).thenReturn(segments);
 
-        // When
         ResponseEntity<List<SegmentDto>> response = segmentController.getAllSegments();
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(1, response.getBody().size());
@@ -68,13 +63,10 @@ class SegmentControllerTest {
 
     @Test
     void getSegmentById_WhenSegmentExists_ShouldReturnSegment() {
-        // Given
         when(segmentService.getSegmentById(1L)).thenReturn(Optional.of(testSegmentDto));
 
-        // When
         ResponseEntity<SegmentDto> response = segmentController.getSegmentById(1L);
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(testSegmentDto.getId(), response.getBody().getId());
@@ -84,13 +76,10 @@ class SegmentControllerTest {
 
     @Test
     void getSegmentById_WhenSegmentNotExists_ShouldReturnNotFound() {
-        // Given
         when(segmentService.getSegmentById(999L)).thenReturn(Optional.empty());
 
-        // When
         ResponseEntity<SegmentDto> response = segmentController.getSegmentById(999L);
 
-        // Then
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
         
@@ -99,13 +88,10 @@ class SegmentControllerTest {
 
     @Test
     void getSegmentByName_WhenSegmentExists_ShouldReturnSegment() {
-        // Given
         when(segmentService.getSegmentByName("TEST_SEGMENT")).thenReturn(Optional.of(testSegmentDto));
 
-        // When
         ResponseEntity<SegmentDto> response = segmentController.getSegmentByName("TEST_SEGMENT");
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(testSegmentDto.getName(), response.getBody().getName());
@@ -115,13 +101,10 @@ class SegmentControllerTest {
 
     @Test
     void getSegmentByName_WhenSegmentNotExists_ShouldReturnNotFound() {
-        // Given
         when(segmentService.getSegmentByName("NONEXISTENT")).thenReturn(Optional.empty());
 
-        // When
         ResponseEntity<SegmentDto> response = segmentController.getSegmentByName("NONEXISTENT");
 
-        // Then
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
         
@@ -130,13 +113,10 @@ class SegmentControllerTest {
 
     @Test
     void createSegment_WhenValidRequest_ShouldCreateSegment() {
-        // Given
         when(segmentService.createSegment(createRequest)).thenReturn(testSegmentDto);
 
-        // When
         ResponseEntity<SegmentDto> response = segmentController.createSegment(createRequest);
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(testSegmentDto.getId(), response.getBody().getId());
@@ -146,13 +126,10 @@ class SegmentControllerTest {
 
     @Test
     void createSegment_WhenServiceThrowsException_ShouldReturnBadRequest() {
-        // Given
         when(segmentService.createSegment(createRequest)).thenThrow(new RuntimeException("Error"));
 
-        // When
         ResponseEntity<SegmentDto> response = segmentController.createSegment(createRequest);
 
-        // Then
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNull(response.getBody());
         
@@ -161,14 +138,11 @@ class SegmentControllerTest {
 
     @Test
     void updateSegment_WhenSegmentExists_ShouldUpdateSegment() {
-        // Given
         when(segmentService.updateSegment(1L, "UPDATED_NAME", "Updated description"))
                 .thenReturn(testSegmentDto);
 
-        // When
         ResponseEntity<SegmentDto> response = segmentController.updateSegment(1L, "UPDATED_NAME", "Updated description");
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(testSegmentDto.getId(), response.getBody().getId());
@@ -178,14 +152,11 @@ class SegmentControllerTest {
 
     @Test
     void updateSegment_WhenSegmentNotExists_ShouldReturnNotFound() {
-        // Given
         when(segmentService.updateSegment(999L, "NEW_NAME", "description"))
                 .thenThrow(new RuntimeException("Segment not found"));
 
-        // When
         ResponseEntity<SegmentDto> response = segmentController.updateSegment(999L, "NEW_NAME", "description");
 
-        // Then
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
         
@@ -194,13 +165,10 @@ class SegmentControllerTest {
 
     @Test
     void deleteSegment_WhenSegmentExists_ShouldDeleteSegment() {
-        // Given
         doNothing().when(segmentService).deleteSegment(1L);
 
-        // When
         ResponseEntity<Void> response = segmentController.deleteSegment(1L);
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNull(response.getBody());
         
@@ -209,13 +177,10 @@ class SegmentControllerTest {
 
     @Test
     void deleteSegment_WhenSegmentNotExists_ShouldReturnNotFound() {
-        // Given
         doThrow(new RuntimeException("Segment not found")).when(segmentService).deleteSegment(999L);
 
-        // When
         ResponseEntity<Void> response = segmentController.deleteSegment(999L);
 
-        // Then
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
         
@@ -224,13 +189,10 @@ class SegmentControllerTest {
 
     @Test
     void getUsersInSegmentCount_ShouldReturnCorrectCount() {
-        // Given
         when(segmentService.getUsersInSegmentCount("TEST_SEGMENT")).thenReturn(5L);
 
-        // When
         ResponseEntity<Long> response = segmentController.getUsersInSegmentCount("TEST_SEGMENT");
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(5L, response.getBody());
         

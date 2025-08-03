@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,8 +17,7 @@ public class DataInitializer implements CommandLineRunner {
     private UserRepository userRepository;
 
     @Override
-    public void run(String... args) throws Exception {
-        // Create test users if none exist
+    public void run(String... args) {
         if (userRepository.count() == 0) {
             createTestUsers();
         }

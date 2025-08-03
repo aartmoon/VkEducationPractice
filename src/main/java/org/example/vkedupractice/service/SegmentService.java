@@ -1,15 +1,14 @@
 package org.example.vkedupractice.service;
 
+import lombok.RequiredArgsConstructor;
 import org.example.vkedupractice.dto.CreateSegmentRequest;
 import org.example.vkedupractice.dto.SegmentDto;
 import org.example.vkedupractice.model.Segment;
 import org.example.vkedupractice.model.User;
 import org.example.vkedupractice.repository.SegmentRepository;
 import org.example.vkedupractice.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -17,15 +16,11 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class SegmentService {
 
-    @Autowired
-    private SegmentRepository segmentRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    private final Random random = new Random();
+    private final SegmentRepository segmentRepository;
+    private final UserRepository userRepository;
 
     public List<SegmentDto> getAllSegments() {
         return segmentRepository.findAll().stream()
@@ -64,22 +59,18 @@ public class SegmentService {
     }
 
     public void deleteSegment(Long id) {
-        // 1) загрузим сам сегмент (связи lazy)
         Segment segment = segmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Segment not found with id: " + id));
 
-        // 2) отчистим все связи с пользователями
         for (User u : segment.getUsers()) {
             u.getSegments().remove(segment);
             userRepository.save(u);
         }
-        // 3) теперь можно спокойно удалить сам сегмент
         segmentRepository.delete(segment);
     }
 
     @Transactional
     public SegmentDto createSegment(CreateSegmentRequest request) {
-        // 1) сохраняем или обновляем сам сегмент
         Segment segment = Segment.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -87,14 +78,11 @@ public class SegmentService {
 
         segment = segmentRepository.save(segment);
         segment = segmentRepository.findById(segment.getId()).orElseThrow();
-        // 2) запускаем вашу функцию, которая сама берёт процент и кидает на нужных пользователей
         assignSegmentToRandomUsers(segment, request.getPercentage());
 
-        // 3) конвертим в DTO
         return SegmentDto.from(segment);
     }
 
-    // File: src/main/java/org/example/vkedupractice/service/SegmentService.java
 
     @Transactional
     public void assignSegmentToRandomUsers(Segment segment, int percentage) {
@@ -107,7 +95,6 @@ public class SegmentService {
 
         int usersToAdd = targetUserCount - currentUserCount;
 
-        // <-- здесь: фильтруем по id, чтобы взять только тех, у кого ещё НЕТ этого сегмента
         List<User> availableUsers = allUsers.stream()
                 .filter(u -> u.getSegments().stream()
                         .noneMatch(s -> s.getId().equals(segment.getId())))  // <-- здесь
@@ -116,8 +103,8 @@ public class SegmentService {
         Random rnd = new Random();
         for (int i = 0; i < Math.min(usersToAdd, availableUsers.size()); i++) {
             User u = availableUsers.remove(rnd.nextInt(availableUsers.size()));
-            u.getSegments().add(segment);      // добавляем сегмент на "владеющей" стороне
-            userRepository.save(u);            // сохраняем только пользователя
+            u.getSegments().add(segment);
+            userRepository.save(u);
         }
     }
 

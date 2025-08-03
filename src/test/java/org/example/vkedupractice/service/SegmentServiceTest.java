@@ -62,14 +62,11 @@ class SegmentServiceTest {
 
     @Test
     void getAllSegments_ShouldReturnAllSegments() {
-        // Given
         List<Segment> segments = Arrays.asList(testSegment);
         when(segmentRepository.findAll()).thenReturn(segments);
 
-        // When
         List<SegmentDto> result = segmentService.getAllSegments();
 
-        // Then
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(testSegment.getId(), result.get(0).getId());
@@ -81,13 +78,10 @@ class SegmentServiceTest {
 
     @Test
     void getSegmentById_WhenSegmentExists_ShouldReturnSegment() {
-        // Given
         when(segmentRepository.findById(1L)).thenReturn(Optional.of(testSegment));
 
-        // When
         Optional<SegmentDto> result = segmentService.getSegmentById(1L);
 
-        // Then
         assertTrue(result.isPresent());
         assertEquals(testSegment.getId(), result.get().getId());
         assertEquals(testSegment.getName(), result.get().getName());
@@ -97,26 +91,20 @@ class SegmentServiceTest {
 
     @Test
     void getSegmentById_WhenSegmentNotExists_ShouldReturnEmpty() {
-        // Given
         when(segmentRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // When
         Optional<SegmentDto> result = segmentService.getSegmentById(999L);
 
-        // Then
         assertFalse(result.isPresent());
         verify(segmentRepository).findById(999L);
     }
 
     @Test
     void getSegmentByName_WhenSegmentExists_ShouldReturnSegment() {
-        // Given
         when(segmentRepository.findByName("TEST_SEGMENT")).thenReturn(Optional.of(testSegment));
 
-        // When
         Optional<SegmentDto> result = segmentService.getSegmentByName("TEST_SEGMENT");
 
-        // Then
         assertTrue(result.isPresent());
         assertEquals(testSegment.getName(), result.get().getName());
 
@@ -125,9 +113,7 @@ class SegmentServiceTest {
 
     @Test
     void createSegment_WhenSegmentNotExists_ShouldCreateSegment() {
-        // Given
-        //when(segmentRepository.existsByName("NEW_SEGMENT")).thenReturn(false);
-        Segment savedSegment = Segment.builder()
+       Segment savedSegment = Segment.builder()
                 .id(1L)
                 .name("NEW_SEGMENT")
                 .description("New test segment")
@@ -137,10 +123,8 @@ class SegmentServiceTest {
         when(segmentRepository.findById(1L)).thenReturn(Optional.of(savedSegment));
         when(userRepository.findAllWithSegments()).thenReturn(Arrays.asList(testUser));
 
-        // When
         SegmentDto result = segmentService.createSegment(createRequest);
 
-        // Then
         assertNotNull(result);
         assertEquals(savedSegment.getId(), result.getId());
         assertEquals(savedSegment.getName(), result.getName());
@@ -152,17 +136,14 @@ class SegmentServiceTest {
 
     @Test
     void createSegment_WhenSegmentExists_ShouldReturnDto() {
-        // Given
         CreateSegmentRequest req = new CreateSegmentRequest("NEW_SEGMENT", "desc", 0);
         Segment saved = new Segment(1L, "NEW_SEGMENT", "desc", now(), Set.of());
         when(segmentRepository.save(any())).thenReturn(saved);
         when(segmentRepository.findById(1L)).thenReturn(Optional.of(saved));
         when(userRepository.findAllWithSegments()).thenReturn(Collections.emptyList());
 
-        // When
         SegmentDto result = segmentService.createSegment(req);
 
-        // Then
         assertEquals(1L, result.getId());
         verify(segmentRepository).save(any(Segment.class));
         verify(segmentRepository).findById(1L);
@@ -170,15 +151,12 @@ class SegmentServiceTest {
 
     @Test
     void updateSegment_WhenSegmentExists_ShouldUpdateSegment() {
-        // Given
         when(segmentRepository.findById(1L)).thenReturn(Optional.of(testSegment));
         when(segmentRepository.existsByName("UPDATED_SEGMENT")).thenReturn(false);
         when(segmentRepository.save(any(Segment.class))).thenReturn(testSegment);
 
-        // When
         SegmentDto result = segmentService.updateSegment(1L, "UPDATED_SEGMENT", "Updated description");
 
-        // Then
         assertNotNull(result);
         assertEquals(testSegment.getId(), result.getId());
 
@@ -189,10 +167,8 @@ class SegmentServiceTest {
 
     @Test
     void updateSegment_WhenSegmentNotExists_ShouldThrowException() {
-        // Given
         when(segmentRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // When & Then
         assertThrows(RuntimeException.class, () -> segmentService.updateSegment(999L, "NEW_NAME", "description"));
         verify(segmentRepository).findById(999L);
         verify(segmentRepository, never()).save(any(Segment.class));
@@ -200,7 +176,6 @@ class SegmentServiceTest {
 
     @Test
     void deleteSegment_WhenSegmentExists_ShouldDeleteSegment() {
-        // Given
         Segment segmentToDelete = Segment.builder()
                 .id(1L)
                 .name("TEST_SEGMENT")
@@ -210,20 +185,16 @@ class SegmentServiceTest {
 
         when(segmentRepository.findById(1L)).thenReturn(Optional.of(segmentToDelete));
 
-        // When
         segmentService.deleteSegment(1L);
 
-        // Then
         verify(segmentRepository).findById(1L);
         verify(userRepository).save(testUser);
         verify(segmentRepository).delete(segmentToDelete);
     }
     @Test
     void deleteSegment_WhenSegmentNotExists_ShouldThrowException() {
-        // Given
         when(segmentRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // When & Then
         assertThrows(RuntimeException.class, () -> segmentService.deleteSegment(999L));
         verify(segmentRepository).findById(999L);
         verify(segmentRepository, never()).deleteById(anyLong());
@@ -231,13 +202,10 @@ class SegmentServiceTest {
 
     @Test
     void getUsersInSegmentCount_ShouldReturnCorrectCount() {
-        // Given
         when(segmentRepository.countUsersInSegment("TEST_SEGMENT")).thenReturn(5L);
 
-        // When
         long result = segmentService.getUsersInSegmentCount("TEST_SEGMENT");
 
-        // Then
         assertEquals(5L, result);
         verify(segmentRepository).countUsersInSegment("TEST_SEGMENT");
     }

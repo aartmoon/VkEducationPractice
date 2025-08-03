@@ -3,16 +3,16 @@ package org.example.vkedupractice.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.vkedupractice.dto.SegmentDto;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "segments")
-// Аналогично — исключаем users из equals/hashCode
-@Getter @Setter
+// Здесь вместо @Data используем явный @Getter/@Setter + @EqualsAndHashCode(exclude = "users")
+// потому что иначе баг с equals и hashCode при использовании @ManyToMany
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

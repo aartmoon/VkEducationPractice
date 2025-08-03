@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: vkedu-postgres
+    environment:
+      POSTGRES_DB: vkedu
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+
+  app:
+    build: .
+    image: vkedu-app
+    depends_on:
+      - db
+    environment:
+      SPRING_PROFILES_ACTIVE: postgresql
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/vkedu
+      SPRING_DATASOURCE_USERNAME: myuser
+      SPRING_DATASOURCE_PASSWORD: mypassword
+    ports:
+      - "8080:8080"

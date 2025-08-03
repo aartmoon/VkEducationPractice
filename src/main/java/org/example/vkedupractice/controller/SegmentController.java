@@ -1,14 +1,12 @@
 package org.example.vkedupractice.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.example.vkedupractice.dto.CreateSegmentRequest;
 import org.example.vkedupractice.dto.SegmentDto;
 import org.example.vkedupractice.service.SegmentService;
-import org.example.vkedupractice.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,13 +14,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/segments")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class SegmentController {
 
-    @Autowired
-    private SegmentService segmentService;
-
-    @Autowired
-    private UserService userService;
+    private final SegmentService segmentService;
 
     @GetMapping
     public ResponseEntity<List<SegmentDto>> getAllSegments() {

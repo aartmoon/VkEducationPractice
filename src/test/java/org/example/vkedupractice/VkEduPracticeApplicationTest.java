@@ -10,12 +10,10 @@ public class VkEduPracticeApplicationTest {
 
     @Test
     void contextLoads() {
-        // Проверяем, что Spring-контекст успешно инициализируется
     }
 
     @Test
     void mainRunsWithoutException() {
-        // Проверяем, что метод main запускается без исключений
         assertThatCode(() -> VkEduPracticeApplication.main(new String[]{}))
                 .doesNotThrowAnyException();
     }

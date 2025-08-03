@@ -1,19 +1,13 @@
 package org.example.vkedupractice.service;
 
-import org.example.vkedupractice.repository.SegmentRepository;
-import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.example.vkedupractice.dto.UserDto;
 import org.example.vkedupractice.dto.UserSegmentsResponse;
 import org.example.vkedupractice.model.Segment;
 import org.example.vkedupractice.model.User;
 import org.example.vkedupractice.repository.UserRepository;
-
-import java.util.HashSet;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -21,15 +15,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class UserService {
-    @Autowired
-    private SegmentRepository segmentRepository;
-    @Autowired
-    private UserRepository userRepository;
+
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
-        return userRepository.findAllWithSegments()        // ← Жёстко JOIN FETCH
+        return userRepository.findAllWithSegments()
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
@@ -55,7 +48,6 @@ public class UserService {
     public Optional<UserDto> getUserById(Long id) {
         return userRepository.findById(id)
                 .map(user -> {
-                    // Принудительно загрузить сегменты
                     user.getSegments().size();
                     return convertToDto(user);
                 });
@@ -66,7 +58,6 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        // Принудительно загрузить сегменты
         user.getSegments().size();
 
         Set<String> segmentNames = user.getSegments().stream()
