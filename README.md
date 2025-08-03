@@ -112,9 +112,9 @@ http://localhost:8081/h2-console
 
 Параметры для PostgreSQL:
 
-DB= vkedu
-USER= myuser
-PASSWORD= mypassword
+- DB= `vkedu`
+- USER= `myuser`
+- PASSWORD= `mypassword`
 
 ## Технологии
 
