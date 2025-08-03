@@ -1,6 +1,6 @@
 # VkEdu Practice - User Segmentation Service
 
-Сервис для управления пользователями и сегментами, позволяющий проводить A/B тестирование новых функций.
+Сервис для управления пользователями и сегментами.
 
 ## Описание
 
@@ -10,15 +10,22 @@
 - Получать информацию о пользователях и их сегментах
 - Получать список пользователей по сегменту
 
-## Запуск приложения
+## Запуск приложения (Prod: PostgreSQL + Docker)
 
-1. Убедитесь, что у вас установлена Java 21
-2. Запустите приложение:
+1. Запустите приложение (первый запуск):
 ```bash
-./mvnw spring-boot:run
+docker-compose up --build -d
+```
+2. Последующие запуски:
+```bash
+docker-compose up -d
+```
+## Запуск приложения (Dev: h2 in memory)
+```bash
+mvn spring-boot:run
 ```
 
-Приложение будет доступно по адресу: http://localhost:8080
+Приложение будет доступно по адресу: http://localhost:8081
 
 ## API Endpoints
 
@@ -93,69 +100,28 @@ DELETE /api/segments/{id}
 GET /api/segments/{name}/users/count
 ```
 
-## Примеры использования
-
-### Создание сегментов для экспериментов
-
-1. **Создание сегмента для голосовых сообщений (20% пользователей):**
-```bash
-curl -X POST http://localhost:8080/api/segments \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "MAIL_VOICE_MESSAGES",
-    "description": "Тестирование голосовых сообщений в почте",
-    "percentage": 20
-  }'
-```
-
-2. **Создание сегмента для скидки в облаке (30% пользователей):**
-```bash
-curl -X POST http://localhost:8080/api/segments \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "CLOUD_DISCOUNT_30",
-    "description": "Скидка 30% на подписку в облаке",
-    "percentage": 30
-  }'
-```
-
-3. **Создание сегмента для GPT в письмах (25% пользователей):**
-```bash
-curl -X POST http://localhost:8080/api/segments \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "MAIL_GPT",
-    "description": "Использование GPT в письмах",
-    "percentage": 25
-  }'
-```
-
-### Получение информации о пользователе
-
-```bash
-curl http://localhost:8080/api/users/1/segments
-```
-
-### Получение пользователей в сегменте
-
-```bash
-curl http://localhost:8080/api/users/segment/MAIL_GPT
-```
-
 ## База данных
 
 Приложение использует H2 in-memory базу данных. Консоль H2 доступна по адресу:
-http://localhost:8080/h2-console
+http://localhost:8081/h2-console
 
 Параметры подключения:
 - JDBC URL: `jdbc:h2:mem:testdb`
 - Username: `sa`
 - Password: `password`
 
+Параметры для PostgreSQL:
+
+DB= vkedu
+USER= myuser
+PASSWORD= mypassword
+
 ## Технологии
 
-- Spring Boot 3.5.3
+- Spring Boot
 - Spring Data JPA
 - H2 Database
+- PostgreSQL
 - Lombok
-- Java 21 
+- Java 21
+- Docker
